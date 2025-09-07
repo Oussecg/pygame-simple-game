@@ -28,9 +28,3 @@ class Player(pygame.sprite.Sprite):
             self.angle -= self.rotation_Speed
             self.img = pygame.transform.rotate(self.original_img, self.angle)
             self.rect = self.img.get_rect(center=self.rect.center)
-
-    def check_live(self):
-        if self.lives <= 0:
-            print("Game Over")
-            pygame.quit()
-            exit()

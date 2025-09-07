@@ -7,6 +7,7 @@ from time import time
 class Game:
     def __init__(self):
         self.game_started = False
+        self.game_finished = False
         self.default_add_increment = 4000
         self.add_increment = self.default_add_increment
         self.max_speed = 2000
@@ -25,11 +26,16 @@ class Game:
         self.live_text = self.font.render(f"Lives: {self.player.lives}", True, "white")
         self.fps = 60
         self.rockets = pygame.sprite.Group()
-        self.start_button = pygame.image.load("assets/images/start.png")
+        self.start_button = pygame.image.load("assets/images/start.png").convert()
         self.start_button = pygame.transform.scale(self.start_button, (200, 100))
         self.start_button_x = (pygame.display.get_surface().get_width() - self.start_button.get_width()) // 2
         self.start_button_y = (pygame.display.get_surface().get_height() - self.start_button.get_height()) // 2
         self.start_button_rect = self.start_button.get_rect(topleft=(self.start_button_x, self.start_button_y))
+        self.game_over_image = pygame.image.load("assets/images/glitch-game-background.jpg")
+        self.game_over_image = pygame.transform.scale(self.game_over_image, (800, 600))
+        self.game_over_image_x = (pygame.display.get_surface().get_width() - self.game_over_image.get_width()) // 2
+        self.game_over_image_y = (pygame.display.get_surface().get_height() - self.game_over_image.get_height()) // 2
+        self.game_over_image_rect = self.game_over_image.get_rect(topleft=(self.game_over_image_x, self.game_over_image_y))
 
     def check_events(self):
         if self.game_started:
@@ -51,10 +57,10 @@ class Game:
                     self.rockets.remove(rocket)
                     self.count -= 1
 
-            for z in range(self.count - len(self.rockets)):
+            for _ in range(self.count - len(self.rockets)):
                 self.rockets.add(Rocket())
 
-            self.player.check_live()
+            self.check_live()
 
             keys = pygame.key.get_pressed()
             if keys[pygame.K_LEFT] or keys[pygame.K_q]:
@@ -67,13 +73,11 @@ class Game:
                 pygame.quit()
                 exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                print(self.start_button.get_rect())
-                print(event.pos)
                 if self.start_button_rect.collidepoint(event.pos):
                     self.game_started = True
 
     def render(self):
-        if self.game_started:
+        if self.game_started and not self.game_finished:
             self.screen.fill((0, 0, 0))
             self.screen.blit(self.background, (0, 0))
             self.screen.blit(self.player.img, self.player.rect)
@@ -81,8 +85,15 @@ class Game:
             self.screen.blit(self.live_text, (pygame.display.get_surface().get_width() - (self.live_text.get_width() + 10), 10))
             self.rockets.draw(self.screen)
             self.clock.tick(self.fps)
-        elif not self.game_started:
+        elif not self.game_started and not self.game_finished:
             self.screen.blit(self.start_button, self.start_button_rect)
+        elif self.game_finished:
+            self.screen.blit(self.game_over_image, self.game_over_image_rect)
 
+    def check_live(self):
+        if self.player.lives <= 0:
+            self.screen.fill("black")
+            self.game_started = False
+            self.game_finished = True
 
 

@@ -5,10 +5,6 @@ pygame.init()
 pygame.font.init()
 game = Game()
 
-
-print(game.start_button_rect.x)
-print(game.start_button_rect.y)
-
 while True:
     game.check_events()
     game.render()
