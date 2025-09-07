@@ -2,10 +2,11 @@ import pygame
 from game import Game
 
 pygame.init()
+pygame.font.init()
 game = Game()
 
 
 while True:
-    game.render()
     game.check_events()
-    game.player.update()
+    game.render()
+    pygame.display.flip()
