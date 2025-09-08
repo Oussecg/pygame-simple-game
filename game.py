@@ -2,6 +2,7 @@ import pygame
 
 from player import Player
 from rocket import Rocket
+from explosion import Explosion
 from time import time
 
 class Game:
@@ -22,6 +23,7 @@ class Game:
         self.background = pygame.transform.scale(self.background, self.screen.get_size())
         self.player = Player()
         self.rocket = Rocket()
+        self.explosion = Explosion()
         self.text = self.font.render(f'Time: {self.elapsed_time}s', True, (255, 255, 255))
         self.live_text = self.font.render(f"Lives: {self.player.lives}", True, "white")
         self.fps = 60
@@ -36,9 +38,11 @@ class Game:
         self.game_over_image_x = (pygame.display.get_surface().get_width() - self.game_over_image.get_width()) // 2
         self.game_over_image_y = (pygame.display.get_surface().get_height() - self.game_over_image.get_height()) // 2
         self.game_over_image_rect = self.game_over_image.get_rect(topleft=(self.game_over_image_x, self.game_over_image_y))
+        self.explosions = pygame.sprite.Group()
 
     def check_events(self):
         if self.game_started:
+            # this is the counter time
             self.elapsed_time = round(time() - self.start_time) * 1000
             if self.add_increment > self.max_speed:
                 self.add_increment = self.default_add_increment
@@ -50,8 +54,11 @@ class Game:
             for rocket in self.rockets:
                 rocket.update()
                 if rocket.rect.bottom >= pygame.display.get_surface().get_height():
-                    self.rockets.remove(rocket)
                     self.count -= 1
+                    explosion = Explosion()
+                    explosion.rect.x, explosion.rect.y = rocket.rect.x, rocket.rect.bottom - explosion.rect.height
+                    self.rockets.remove(rocket)
+                    self.explosions.add(explosion)
                 elif rocket.rect.colliderect(self.player.rect):
                     self.player.lives -= 1
                     self.rockets.remove(rocket)
@@ -59,6 +66,10 @@ class Game:
 
             for _ in range(self.count - len(self.rockets)):
                 self.rockets.add(Rocket())
+
+            for explosion in self.explosions:
+                if explosion.animate():
+                    self.explosions.remove(explosion)
 
             self.check_live()
 
@@ -84,6 +95,7 @@ class Game:
             self.screen.blit(self.text, (10, 10))
             self.screen.blit(self.live_text, (pygame.display.get_surface().get_width() - (self.live_text.get_width() + 10), 10))
             self.rockets.draw(self.screen)
+            self.explosions.draw(self.screen)
             self.clock.tick(self.fps)
         elif not self.game_started and not self.game_finished:
             self.screen.blit(self.start_button, self.start_button_rect)
