@@ -1,5 +1,4 @@
 import pygame
-
 from player import Player
 from rocket import Rocket
 from explosion import Explosion
@@ -9,9 +8,8 @@ class Game:
     def __init__(self):
         self.game_started = False
         self.game_finished = False
-        self.default_add_increment = 4000
-        self.add_increment = self.default_add_increment
-        self.max_speed = 2000
+        self.max_rockets = 5
+        self.max_speed = 5
         self.count = 0
         self.start_time = time()
         self.elapsed_time = 0
@@ -22,10 +20,11 @@ class Game:
         self.background = pygame.image.load("assets/images/bg.jpeg").convert()
         self.background = pygame.transform.scale(self.background, self.screen.get_size())
         self.player = Player()
-        self.rocket = Rocket()
+        self.rocket = Rocket(self.elapsed_time)
         self.explosion = Explosion()
         self.text = self.font.render(f'Time: {self.elapsed_time}s', True, (255, 255, 255))
         self.live_text = self.font.render(f"Lives: {self.player.lives}", True, "white")
+        self.fps_text = self.font.render(f"FPS: {self.clock.get_fps()}", True, "yellow")
         self.fps = 60
         self.rockets = pygame.sprite.Group()
         self.start_button = pygame.image.load("assets/images/start.png").convert()
@@ -39,23 +38,30 @@ class Game:
         self.game_over_image_y = (pygame.display.get_surface().get_height() - self.game_over_image.get_height()) // 2
         self.game_over_image_rect = self.game_over_image.get_rect(topleft=(self.game_over_image_x, self.game_over_image_y))
         self.explosions = pygame.sprite.Group()
+        self.game_over_sound = pygame.mixer.Sound("assets/mp3/game-over-arcade-6435.mp3")
 
     def check_events(self):
         if self.game_started:
             # this is the counter time
             self.elapsed_time = round(time() - self.start_time) * 1000
-            if self.add_increment > self.max_speed:
-                self.add_increment = self.default_add_increment
-                self.add_increment -= self.elapsed_time // 100
-            self.count = self.elapsed_time // self.add_increment
             self.text = self.font.render(f'Time: {self.elapsed_time // 1000}s', True, (255, 255, 255))
             self.live_text = self.font.render(f"Lives: {self.player.lives}", True, "red")
+            self.fps_text = self.font.render(f"FPS: {round(self.clock.get_fps())}", True, "yellow")
+            # todo : Optimize the logic of adding rocket !
+            add_speed = self.elapsed_time / 200000
+            max_add_speed = min(add_speed, 0.5)
+            if self.count + max_add_speed <= self.max_rockets:
+                self.count += max_add_speed
+
+            for _ in range(round(self.count) - len(self.rockets)):
+                self.rockets.add(Rocket(self.elapsed_time))
 
             for rocket in self.rockets:
                 rocket.update()
                 if rocket.rect.bottom >= pygame.display.get_surface().get_height():
                     self.count -= 1
                     explosion = Explosion()
+                    explosion.play_sound()
                     explosion.rect.x, explosion.rect.y = rocket.rect.x, rocket.rect.bottom - explosion.rect.height
                     self.rockets.remove(rocket)
                     self.explosions.add(explosion)
@@ -63,9 +69,10 @@ class Game:
                     self.player.lives -= 1
                     self.rockets.remove(rocket)
                     self.count -= 1
+                    self.player.time = time()
+                    self.player.animation_damage()
 
-            for _ in range(self.count - len(self.rockets)):
-                self.rockets.add(Rocket())
+
 
             for explosion in self.explosions:
                 if explosion.animate():
@@ -94,6 +101,7 @@ class Game:
             self.screen.blit(self.player.img, self.player.rect)
             self.screen.blit(self.text, (10, 10))
             self.screen.blit(self.live_text, (pygame.display.get_surface().get_width() - (self.live_text.get_width() + 10), 10))
+            self.screen.blit(self.fps_text, (pygame.display.get_surface().get_width() - (self.fps_text.get_width() + 10), (self.live_text.get_height() + 10)))
             self.rockets.draw(self.screen)
             self.explosions.draw(self.screen)
             self.clock.tick(self.fps)
@@ -104,8 +112,8 @@ class Game:
 
     def check_live(self):
         if self.player.lives <= 0:
+            self.game_over_sound.play()
             self.screen.fill("black")
             self.game_started = False
             self.game_finished = True
-
 

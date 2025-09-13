@@ -10,6 +10,7 @@ class Explosion(pygame.sprite.Sprite):
         self.listImage = []
         self.start_animation_time = time()
         self.animation_time = 50
+        self.explosion_sound = pygame.mixer.Sound("assets/mp3/massive-explosion-2-397983.mp3")
         self.frame = 0
 
         for x in range(12):
@@ -27,3 +28,6 @@ class Explosion(pygame.sprite.Sprite):
             else:
                 self.image = self.listImage[self.frame]
                 return False
+
+    def play_sound(self):
+        self.explosion_sound.play()
