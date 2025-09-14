@@ -64,11 +64,9 @@ class Game:
                     self.rocket_group.remove(rocket)
                     self.explosions.add(explosion)
                 elif rocket.rect.colliderect(self.player.rect):
-                    self.player.lives -= 1
                     self.rocket_group.remove(rocket)
                     self.count -= 1
-                    self.player.time = time()
-                    self.player.animation_damage()
+                    self.player.damage_taken = True
 
             for explosion in self.explosions:
                 if explosion.animate():
@@ -90,6 +88,8 @@ class Game:
                 if self.start_button_rect.collidepoint(event.pos):
                     self.game_started = True
 
+        self.player.update_player()
+
     def render(self):
         if self.game_started and not self.game_finished:
             self.screen.fill((0, 0, 0))
@@ -107,6 +107,7 @@ class Game:
 
     def check_live(self):
         if self.player.lives <= 0:
+            pygame.mixer.stop()
             self.game_over_sound.play()
             self.screen.fill("black")
             self.game_started = False

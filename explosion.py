@@ -5,7 +5,7 @@ from time import time
 class Explosion(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load("assets/images/spritsheet.png")
+        self.image = pygame.image.load("assets/images/spritsheet.png").convert_alpha()
         self.spriteSheet = SpriteSheet(self.image)
         self.listImage = []
         self.start_animation_time = time()

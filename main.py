@@ -11,3 +11,4 @@ while True:
     game.render()
     pygame.display.flip()
 
+

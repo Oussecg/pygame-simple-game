@@ -7,6 +7,7 @@ class Rockets:
     min_rocket_speed = 3
     start_time = time()
     is_max_speed = False
+    
     def __init__(self):
         self.current_time = Rockets.start_time
         self.origin_img = pygame.image.load('assets/images/meteor.png').convert_alpha()

@@ -4,6 +4,9 @@ from time import time
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
+        self.damage_taken = False
+        self.animation_finished = True
+        self.animation_refresh = 0
         self.max_lives = 10
         self.lives = self.max_lives
         self.original_img = pygame.image.load('assets/images/sprite.png').convert_alpha()
@@ -16,6 +19,7 @@ class Player(pygame.sprite.Sprite):
         self.angle = 0
         self.rotation_Speed = 5
         self.time = time()
+        self.hit_sound = pygame.mixer.Sound("assets/mp3/damage-taken.mp3")
 
     def move_left(self):
         if 0 < self.rect.left + self.velocity[0]:
@@ -31,10 +35,27 @@ class Player(pygame.sprite.Sprite):
             self.img = pygame.transform.rotate(self.original_img, self.angle)
             self.rect = self.img.get_rect(center=self.rect.center)
 
-    def animation_damage(self):
-        if round(time() - self.time) * 1000 >= 400:
+    def update_player(self):
+        if self.damage_taken:
+            self.play_sound()
+            self.lives -= 1
+            self.damage_taken = False
+            self.animation_finished = False
             self.time = time()
-            if self.img.get_alpha() == 255:
-                self.img.set_alpha(128)
-            else:
-                self.img.set_alpha(255)
+        self.animation_damage()
+
+    def animation_damage(self):
+        if self.animation_finished == False:
+            if (time() - self.time ) * 1000 >= 70:
+                self.time = time()
+                self.animation_refresh += 1
+                if self.img.get_alpha() == 255:
+                    self.img.set_alpha(128)
+                else:
+                    self.img.set_alpha(255)
+                if self.animation_refresh >= 10:
+                    self.animation_finished = True
+                    self.animation_refresh = 0
+
+    def play_sound(self):
+        self.hit_sound.play()
