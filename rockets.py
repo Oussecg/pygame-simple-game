@@ -12,7 +12,6 @@ class Rockets:
         self.origin_img = pygame.image.load('assets/images/meteor.png').convert_alpha()
         self.origin_img = pygame.transform.scale(self.origin_img, (20, 20))
 
-    # todo: add a variable is_max_speed that will increase the speed of the player
     def add_speed(self):
         complete = False
         max_speed = self.max_rocket_speed

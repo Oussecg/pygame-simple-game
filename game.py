@@ -26,7 +26,6 @@ class Game:
         self.explosion = Explosion()
         self.text = self.font.render(f'Time: {self.elapsed_time}s', True, (255, 255, 255))
         self.live_text = self.font.render(f"Lives: {self.player.lives}", True, "white")
-        self.fps_text = self.font.render(f"FPS: {self.clock.get_fps()}", True, "yellow")
         self.fps = 60
         self.start_button = pygame.image.load("assets/images/start.png").convert()
         self.start_button = pygame.transform.scale(self.start_button, (200, 100))
@@ -47,7 +46,6 @@ class Game:
             self.elapsed_time = round(time() - self.start_time) * 1000
             self.text = self.font.render(f'Time: {self.elapsed_time // 1000}s', True, (255, 255, 255))
             self.live_text = self.font.render(f"Lives: {self.player.lives}", True, "red")
-            self.fps_text = self.font.render(f"FPS: {round(self.clock.get_fps())}", True, "yellow")
             add_speed = self.elapsed_time / 200000
             max_add_speed = min(add_speed, 0.5)
             if self.count + max_add_speed <= self.max_rockets:
@@ -71,8 +69,6 @@ class Game:
                     self.count -= 1
                     self.player.time = time()
                     self.player.animation_damage()
-
-
 
             for explosion in self.explosions:
                 if explosion.animate():
@@ -101,7 +97,6 @@ class Game:
             self.screen.blit(self.player.img, self.player.rect)
             self.screen.blit(self.text, (10, 10))
             self.screen.blit(self.live_text, (pygame.display.get_surface().get_width() - (self.live_text.get_width() + 10), 10))
-            self.screen.blit(self.fps_text, (pygame.display.get_surface().get_width() - (self.fps_text.get_width() + 10), (self.live_text.get_height() + 10)))
             self.rocket_group.draw(self.screen)
             self.explosions.draw(self.screen)
             self.clock.tick(self.fps)
