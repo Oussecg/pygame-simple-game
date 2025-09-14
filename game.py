@@ -42,6 +42,7 @@ class Game:
 
     def check_events(self):
         if self.game_started:
+            self.start_time = time()
             # this is the counter time
             self.elapsed_time = round(time() - self.start_time) * 1000
             self.text = self.font.render(f'Time: {self.elapsed_time // 1000}s', True, (255, 255, 255))
